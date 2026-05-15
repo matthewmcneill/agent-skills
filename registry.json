@@ -56,6 +56,16 @@
         "pinnedHash": "295f5d15167efa0bd9786e1a70e20f0e03df3fca"
       },
       "importedAt": "2026-05-15T22:38:51Z"
+    },
+    "mysql": {
+      "type": "imported",
+      "origin": {
+        "repo": "https://github.com/planetscale/database-skills.git",
+        "branch": "main",
+        "path": "skills/mysql",
+        "pinnedHash": "b156f4ca73c03d0350438bfd042331aaef6eec77"
+      },
+      "importedAt": "2026-05-15T22:40:52Z"
     }
   }
 }
