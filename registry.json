@@ -46,6 +46,16 @@
         "pinnedHash": "09f3d8e18d10af174bbdf9ae82d80a840ed238f5"
       },
       "importedAt": "2026-05-15T22:32:44Z"
+    },
+    "terrashark": {
+      "type": "imported",
+      "origin": {
+        "repo": "https://github.com/LukasNiessen/terrashark.git",
+        "branch": "main",
+        "path": "",
+        "pinnedHash": "295f5d15167efa0bd9786e1a70e20f0e03df3fca"
+      },
+      "importedAt": "2026-05-15T22:38:51Z"
     }
   }
 }
