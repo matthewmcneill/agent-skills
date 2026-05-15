@@ -36,6 +36,16 @@
         "path": "skills/systematic-debugging"
       },
       "importedAt": "2026-05-15T22:17:16Z"
+    },
+    "pio-manager": {
+      "type": "imported",
+      "origin": {
+        "repo": "https://github.com/jl-codes/platformio-mcp.git",
+        "branch": "main",
+        "path": ".agents/skills/pio-manager",
+        "pinnedHash": "09f3d8e18d10af174bbdf9ae82d80a840ed238f5"
+      },
+      "importedAt": "2026-05-15T22:32:44Z"
     }
   }
 }
