@@ -6,12 +6,14 @@
       "importedAt": "2026-05-15T19:33:00Z"
     },
     "distillery": {
-      "type": "imported",
+      "type": "forked",
       "origin": {
         "repo": "/Users/mcneillm/Documents/Agent Skills/skill-manager",
         "branch": "main",
         "path": ".agents/skills/distillery",
-        "pinnedHash": "75660486d33ca5b9c257557be50c012ae1ff3221"
+        "pinnedHash": "75660486d33ca5b9c257557be50c012ae1ff3221",
+        "forkedFromHash": "75660486d33ca5b9c257557be50c012ae1ff3221",
+        "forkedAt": "2026-05-15T19:33:41Z"
       },
       "importedAt": "2026-05-15T19:33:34Z"
     }
