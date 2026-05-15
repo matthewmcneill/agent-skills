@@ -28,6 +28,14 @@
         "path": "skills/skill-creator"
       },
       "importedAt": "2026-05-15T22:17:15Z"
+    },
+    "systematic-debugging": {
+      "type": "imported",
+      "origin": {
+        "repo": "https://github.com/obra/superpowers.git",
+        "path": "skills/systematic-debugging"
+      },
+      "importedAt": "2026-05-15T22:17:16Z"
     }
   }
 }
