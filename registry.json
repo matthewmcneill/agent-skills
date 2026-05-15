@@ -76,6 +76,15 @@
         "pinnedHash": "b156f4ca73c03d0350438bfd042331aaef6eec77"
       },
       "importedAt": "2026-05-15T22:40:53Z"
+    },
+    "embedded-systems": {
+      "type": "imported",
+      "origin": {
+        "repo": "https://github.com/jl-codes/platformio-mcp.git",
+        "branch": "main",
+        "path": ".agents/skills/embedded-systems"
+      },
+      "importedAt": "2026-05-15T23:11:14Z"
     }
   }
 }
