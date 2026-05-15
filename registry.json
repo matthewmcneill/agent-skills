@@ -78,13 +78,12 @@
       "importedAt": "2026-05-15T22:40:53Z"
     },
     "embedded-systems": {
-      "type": "imported",
+      "type": "authored",
       "origin": {
-        "repo": "https://github.com/jl-codes/platformio-mcp.git",
-        "branch": "main",
-        "path": ".agents/skills/embedded-systems"
+        "repo": "https://github.com/matthewmcneill/agent-skills.git",
+        "path": "skills/embedded-systems"
       },
-      "importedAt": "2026-05-15T23:11:14Z"
+      "importedAt": "2026-05-15T23:13:02Z"
     }
   }
 }
