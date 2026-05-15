@@ -66,6 +66,16 @@
         "pinnedHash": "b156f4ca73c03d0350438bfd042331aaef6eec77"
       },
       "importedAt": "2026-05-15T22:40:52Z"
+    },
+    "postgres": {
+      "type": "imported",
+      "origin": {
+        "repo": "https://github.com/planetscale/database-skills.git",
+        "branch": "main",
+        "path": "skills/postgres",
+        "pinnedHash": "b156f4ca73c03d0350438bfd042331aaef6eec77"
+      },
+      "importedAt": "2026-05-15T22:40:53Z"
     }
   }
 }
