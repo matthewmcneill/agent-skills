@@ -84,6 +84,16 @@
         "path": "skills/embedded-systems"
       },
       "importedAt": "2026-05-15T23:13:02Z"
+    },
+    "device-mcp-client": {
+      "type": "authored",
+      "origin": null,
+      "importedAt": "2026-05-15T23:16:04Z"
+    },
+    "house-style-docs": {
+      "type": "authored",
+      "origin": null,
+      "importedAt": "2026-05-15T23:16:04Z"
     }
   }
 }
