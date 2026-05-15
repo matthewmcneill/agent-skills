@@ -94,6 +94,18 @@
       "type": "authored",
       "origin": null,
       "importedAt": "2026-05-15T23:16:04Z"
+    },
+    "oo-expert": {
+      "type": "forked",
+      "origin": {
+        "repo": "unknown",
+        "branch": "unknown",
+        "path": "oo-expert",
+        "pinnedHash": null,
+        "forkedFromHash": null,
+        "forkedAt": "2026-05-15T23:19:02Z"
+      },
+      "importedAt": "2026-05-15T23:19:02Z"
     }
   }
 }
