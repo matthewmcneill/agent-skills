@@ -4,6 +4,14 @@
     "skill-manager": {
       "type": "authored",
       "importedAt": "2026-05-15T19:33:00Z"
+    },
+    "distillery": {
+      "type": "imported",
+      "origin": {
+        "repo": "https://github.com/matthewmcneill/agent-skills.git",
+        "path": "skills/distillery"
+      },
+      "importedAt": "2026-05-15T22:17:13Z"
     }
   }
 }
