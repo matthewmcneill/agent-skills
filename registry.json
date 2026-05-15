@@ -12,6 +12,14 @@
         "path": "skills/distillery"
       },
       "importedAt": "2026-05-15T22:17:13Z"
+    },
+    "principal-architect": {
+      "type": "imported",
+      "origin": {
+        "repo": "https://github.com/matthewmcneill/agent-skills.git",
+        "path": "skills/principal-architect"
+      },
+      "importedAt": "2026-05-15T22:17:14Z"
     }
   }
 }
