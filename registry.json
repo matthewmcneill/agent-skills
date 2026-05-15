@@ -16,16 +16,6 @@
         "forkedAt": "2026-05-15T19:33:41Z"
       },
       "importedAt": "2026-05-15T19:33:34Z"
-    },
-    "terraform-test": {
-      "type": "imported",
-      "origin": {
-        "repo": "/Users/mcneillm/Documents/Agent Skills/hashicorp/agent-skills",
-        "branch": "main",
-        "path": "terraform/code-generation/skills/terraform-test",
-        "pinnedHash": "876a095c71079e4c112fb1de2f1a66dca0ffea23"
-      },
-      "importedAt": "2026-05-15T21:33:18Z"
     }
   }
 }
