@@ -90,3 +90,5 @@ All scripts return JSON errors to `stderr` and human-readable hints.
 ## Further Reading
 - [Registry & Workspace Formats](references/registry-format.md)
 - [Trust Tiers Specification](references/trust-tiers.md)
+
+# Verification Comment
