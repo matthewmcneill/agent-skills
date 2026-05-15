@@ -20,6 +20,14 @@
         "path": "skills/principal-architect"
       },
       "importedAt": "2026-05-15T22:17:14Z"
+    },
+    "skill-creator": {
+      "type": "imported",
+      "origin": {
+        "repo": "https://github.com/anthropics/skills.git",
+        "path": "skills/skill-creator"
+      },
+      "importedAt": "2026-05-15T22:17:15Z"
     }
   }
 }
