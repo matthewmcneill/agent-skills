@@ -1,119 +1,51 @@
 ---
 name: house-style-documentation
-description: Consistently and thoroughly document C++ code following the project's "house style". Use this skill whenever documenting, refactoring, or creating new C++ modules to ensure they meet the specific header, method, and inline comment standards. Also use this skill whenever drafting or reviewing an implementation plan to ensure it adheres to the project structure.
-triggers: implementation plan, drafting plan, documentation, refactoring, C++ modules, review-ip, ip-review
+description: Consistently and thoroughly document code following the project's "house style". Use this skill whenever documenting, refactoring, or creating new modules to ensure they meet the specific header, method, and inline comment standards. Also use this skill whenever drafting or reviewing an implementation plan to ensure it adheres to the project structure. Trigger on mentions of naming conventions, documentation standards, code style, implementation plan review, or house style.
+triggers: implementation plan, drafting plan, documentation, refactoring, review-ip, ip-review, naming conventions, code style
 ---
 
 # House Style Documentation
 
-Enforce a specific set of documentation standards for C++ header and source files.
+Enforce a consistent set of documentation and naming standards across the project. This skill is **language-agnostic at the principle level** — concrete syntax, examples, and naming conventions live in language-specific reference files loaded on demand.
 
-## High-Level Standards
+## Universal Principles
 
-1.  **Module Headers**: Every file must have a standard header block.
-2.  **Function/Method Documentation**: All public and private functions/methods must have Doxygen-style comments.
-3.  **Variable/Constant Documentation**: Module-level scoped items must have same-line comments.
-4.  **Functional Flow**: Longer functions must have block comments describing the "why" and "how" of the process.
-5.  **Arcane Logic**: Complex or non-obvious code lines must be explained.
-6.  **Naming Conventions**: File names and library names must use `camelCase`.
-7.  **Implementation Plans**: All implementation plans must be reviewed for house style (Goal, Review Required, Proposed Changes, Verification).
+These principles apply to **all** codebases regardless of language:
+
+### 1. Module Headers
+Every source file must begin with a standard header block containing: project attribution, license, module path, description, and an exported API summary. The header allows a developer to understand the file's purpose and public surface without reading the implementation.
+
+### 2. Function and Method Documentation
+All public and protected functions/methods must have structured documentation comments (language-appropriate format). Include: a brief summary, parameter descriptions, return value description, and any thrown exceptions or error conditions.
+
+### 3. Scoped Variables and Constants
+Module-level variables, constants, and configuration values must have a short descriptive comment — either inline (same line) or immediately preceding the declaration.
+
+### 4. Internal Functional Flow
+For functions longer than ~15 lines, use block comments to group logical steps and explain the "why" and "how" of the process. This creates a scannable narrative through complex logic.
+
+### 5. Arcane and Complex Logic
+Identify lines of code that are not self-explanatory — bit manipulation, complex expressions, hardware-specific quirks, non-obvious algorithms — and provide an inline explanation.
+
+### 6. Naming Conventions
+All type names, file names, variable names, and directory names must follow the conventions defined in the **language-specific reference file** (see below). Consistency is non-negotiable.
 
 ---
 
-## 1. Module Headers
+## Language-Specific Conventions
 
-Every file MUST start with the standard license header, followed by `Module:`, `Description:`, and `Exported Functions/Classes:`.
+This skill supports multiple development contexts. Detect the project type and load the **appropriate reference file** for language-specific rules, naming conventions, documentation syntax, and code examples.
 
-### Format:
-```cpp
-/*
- * Departures Board (c) 2025-2026 Gadec Software
- * Refactored for v3.0 by Matt McNeill 2026 CB Labs
- *
- * https://github.com/gadec-uk/departures-board
- *
- * This work is licensed under Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International.
- * To view a copy of this license, visit https://creativecommons.org/licenses/by-nc-sa/4.0/
- *
- * Module: [file path relative to repo root]
- * Description: [multi-line description of the module's responsibility]
- *
- * Exported Functions/Classes:
- * - [Name]: [Single-line description]
- * - [ClassName]: [Class description]
- *   - [MethodName](): [Single-line description]
- *   - [VariableName]: [Single-line description]
- */
-```
+| Indicator | Context | Reference File |
+|-----------|---------|---------------|
+| `platformio.ini` in project root | Embedded C++ (ESP32/Arduino) | `references/cpp-embedded.md` |
+| `build.gradle.kts` in project root | Kotlin Android | `references/kotlin-android.md` |
+| `package.json` in project root | Web / JS / TS | `references/web-frontend.md` |
+
+Read **only** the reference file matching the detected context. If multiple indicators are present, prefer the most specific match. If no context is detected, default to `references/cpp-embedded.md`.
 
 > [!IMPORTANT]
-> The "Exported Functions/Classes" list is critical. It should allow a developer to quickly see the services offered by the module without reading the whole file. Provide a one-line summary for EVERY externalized method, property, and variable.
-
----
-
-## 2. Function and Method Documentation
-
-Use Doxygen-style comment blocks for all declarations and implementations.
-
-### Format:
-```cpp
-/**
- * @brief [Concise summary of what the function does]
- * @param [paramName] [Description of the parameter]
- * @return [Description of the return value, if applicable]
- */
-void myFunction(int param1);
-```
-
----
-
-## 3. Scoped Variables and Constants
-
-For variables and constants defined at the module level (headers or file-scope in `.cpp`), add a short description on the same line.
-
-### Example:
-```cpp
-#define MAX_RETRY_COUNT 5 // Maximum number of connection attempts before failing
-int currentRetryCount = 0; // Tracking variable for active connection attempts
-```
-
----
-
-## 4. Internal Functional Flow
-
-For functions longer than ~15 lines, use block comments to group logical steps and explain the flow.
-
-### Example:
-```cpp
-void complexProcess() {
-  // --- Step 1: Initialize hardware ---
-  // Ensure the peripheral is in a clean state before signaling
-  ...
-
-  // --- Step 2: Protocol Handshake ---
-  // Negotiate speed and duplex with the remote peer
-  ...
-}
-```
-
----
-
-## 5. Arcane and Complex Logic
-
-Identify lines of code that are not self-explanatory (bit manipulation, complex pointer arithmetic, hardware-specific quirks) and provide an explanation.
-
-### Example:
-```cpp
-uint8_t flags = (data >> 4) & 0x0F; // Extract 4-bit status nibble from high byte
-```
-
-## 6. Naming Conventions
-
-All file names and library names MUST follow the `camelCase` naming convention. This ensures consistency across the codebase.
-
-### Requirements:
-- **File Names**: Use `camelCase.cpp` or `camelCase.hpp` (e.g., `displayManager.cpp`, `wifiConfig.hpp`).
-- **Library Names**: External libraries or internal modules should be referred to using `camelCase` in documentation and configuration.
+> The reference file contains the **concrete examples, templates, and naming tables** for the detected language. Do not apply conventions from one language context to another.
 
 ---
 
@@ -121,9 +53,9 @@ All file names and library names MUST follow the `camelCase` naming convention. 
 
 Whenever an implementation plan is produced, it MUST be reviewed and updated to adhere to the project's house style.
 
-### Structure:
+### Structure
 - **Goal Description**: Clear, concise explanation of the objective.
-- **User Review Required**: Highlight critical decisions or breaking changes using GitHub alerts.
+- **User Review Required**: Highlight critical decisions or breaking changes using GitHub alerts (`IMPORTANT`, `WARNING`, `CAUTION`).
 - **Proposed Changes**: Grouped by component, using `[MODIFY]`, `[NEW]`, and `[DELETE]` tags with repository-relative file links (e.g., `[file.cpp](modules/foo/file.cpp)`). Absolute paths to the project directory are FORBIDDEN.
 - **Verification Plan**: Practical steps for automated and manual verification.
 
@@ -131,9 +63,10 @@ Whenever an implementation plan is produced, it MUST be reviewed and updated to 
 
 ## Workflow
 
-1.  Read the target file OR implementation plan.
-2.  Identity missing or substandard documentation/content based on the rules above.
-3.  Ensure the file name and module naming follow the `camelCase` requirement.
-4.  For implementation plans, ensure all standard sections are present and correctly formatted.
-5.  Regenerate the content with the improved house style.
-6.  Ensure existing logic or plan details are PRESERVED exactly; only formatting and clarity should change.
+1. Detect the project context and load the appropriate language reference file.
+2. Read the target file OR implementation plan.
+3. Identify missing or substandard documentation/content based on the universal principles above AND the language-specific reference.
+4. Verify all naming conventions match the language-specific naming table.
+5. For implementation plans, ensure all standard sections are present and correctly formatted.
+6. Regenerate the content with the improved house style.
+7. Ensure existing logic or plan details are PRESERVED exactly; only formatting and clarity should change.
