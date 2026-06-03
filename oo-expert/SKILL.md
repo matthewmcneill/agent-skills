@@ -1,6 +1,6 @@
 ---
-name: architectural-refactoring
-description: Critically review C++ or module codebases, make architectural recommendations, and refactor the code to improve readability, abstraction, and encapsulation using OOP paradigms. Use this skill whenever you are asked to refactor, improve the architecture of a module, reduce global state, or evaluate a component against object-oriented best practices.
+name: oo-expert
+description: Critically review C++ or module codebases, make architectural recommendations, and refactor the code to improve readability, abstraction, and encapsulation using OOP paradigms. Use this skill whenever you are asked to refactor, improve the architecture of a module, reduce global state, evaluate a component against object-oriented best practices, design a hierarchical sub-object API, or identify the Orchestrator Anti-Pattern (a module polling external state in its tick loop).
 ---
 
 # Architectural Refactoring Skill
@@ -54,6 +54,18 @@ Once the user approves a step, execute the refactoring carefully:
 3. Shift global state into localized configurations or manager classes.
 4. Update the bootstrapping code to use Dependency Injection.
 5. Ensure the code remains compilable after each logical step. If you remove global variables, ensure they are properly passed into the dependent objects.
+
+## Reference Guide
+
+Load the appropriate reference file when the analysis reveals one of these patterns.
+Do not load reference files speculatively — read the code first, then load on demand.
+
+| Pattern | Reference | Load When |
+|---|---|---|
+| Hierarchical Object Model | `references/hierarchical-object-model.md` | Flat getter methods exposing internal sub-objects; Law of Demeter violations; designing a new multi-sub-object API; Two-Step Smell (configure + separately surface) |
+| Service Module Pattern | `references/service-module-pattern.md` | Module holds Application hub reference; `tick()` polls external system state; state-machine phase logic inside a service module; `SystemState` / `AppState` in a non-orchestrator module |
+
+---
 
 ## Example Output Format
 When presenting the initial evaluation (Step 2 & 3), format it clearly:
