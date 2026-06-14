@@ -22,7 +22,6 @@ The complexity of our migrations requires "The Torvalds Standard" of atomicity: 
 3. **Spawn Principal Architects:** When it is time to execute a Project (PR), you must generate a strict Bridge Prompt that boots up a new Agent in the **Principal Architect** identity, passing them the mandate for their specific PR.
 4. **Ingest Distillations:** When a PA finishes a PR and distills their context, you must read their distillation to update the `PROGRAM.md` state before moving to the next PR in the sequence.
 5. **Targeted Distillation:** Whenever invoking `@distillery` to save program state, you MUST explicitly instruct the distillery to output its archives into the current active Program's workspace folder (e.g., `.agents/skills/principal-architect-workspace/[program-name]/distillations/`), NOT the default global context archives.
-6. **Context Firewall:** If detailed program-level discussions are needed (e.g., debating dependency ordering, resolving cross-PR conflicts, exploring design trade-offs with the user), you MUST generate a Fork Session bridge prompt rather than engaging in extended detailed work yourself. The Fork Session template follows the same pattern as the PA's Step 5b, but scoped to program-level memory roots (`PROGRAM.md`, `PROGRAM-PLAN.md`).
 
 ## Interaction Loop
 1. Review `PROGRAM.md` and `PROGRAM-PLAN.md`.
