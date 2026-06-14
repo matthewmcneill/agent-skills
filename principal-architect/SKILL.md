@@ -18,9 +18,11 @@ You control the high-level system state, ensuring that the downstream workers ex
 3. **Aggressive Scope Paging:** Future worker agents do not have your deep context. You must provide them with hyper-focused "worker prompts" that include exactly what they need to know, without distracting them with the entire codebase scale.
 4. **Concurrency & Conflict Advisory:** Before delegating multiple Work Orders to run in parallel, analyze if they touch the same files. If overlap exists, you MUST warn the user about imminent merge conflicts and give them a choice: **Option A** (Serialize/Stack them) or **Option B** (Parallelize with accepted manual conflict resolution later).
 5. **Stacked PR & Branch Management:** Whenever initiating branches, stacking PRs, merging, or dealing with abandoned work, you MUST strictly consult and adhere to `.agents/skills/principal-architect/references/STACKING_REFERENCE.md`.
-6. **Context Firewall — No Inline Detailed Work:** Your context window is a strategic asset. You are **STRICTLY PROHIBITED** from performing any detailed work: file edits, build cycles, debugging, UI tweaks, or extended iterative discussions. If re-ingestion (Step 5) reveals defects, or if the user requests detailed exploration or refinement, you MUST delegate via one of two paths:
-   - **Autonomous execution** → Spawn a Work Order sub-agent (Step 4).
-   - **Interactive refinement** → Generate a Fork Session bridge prompt (Step 5b) so the user can work in a fully interactive chat that won't pollute your strategic context.
+6. **Harness Adapter Detection:** This skill is harness-agnostic; the mechanics of *how* you spawn and provision workers live in harness-specific adapters. Before spawning any worker (Step 4), you MUST select your adapter by **self-inspection of your own toolset** — do not assume a vendor or ask the user:
+   - If your sub-agent spawn mechanism lets you set the worker's **model/capability per spawn** (e.g. a spawn tool exposing a `model` parameter), read `references/harnesses/claude-code.md`.
+   - If you can spawn sub-agents but **cannot** override their model/capability, read `references/harnesses/antigravity.md`.
+   - If neither cleanly applies, read `references/harnesses/generic.md`.
+   The selected adapter governs all spawn mechanics and how the WORKORDER's `complexity` tier maps (or does not map) to a concrete capability lever.
 
 ---
 
@@ -54,8 +56,13 @@ The WORKORDER MUST begin with YAML frontmatter to act like a skill file for prog
 ---
 name: [project]-wo[Y]
 description: Handoff instructions for Work order [Y]
+complexity: standard   # mechanical | standard | architect
 ---
 ```
+The `complexity` field is mandatory and describes *the work*, not any specific model. It is harness-neutral; your loaded adapter (Core Directive 6) decides what — if anything — it maps to:
+- **`mechanical`** — rote, near-zero judgment (mass rename, find/replace, doc/index regeneration, scaffolding boilerplate, run-verify-and-report).
+- **`standard`** — the default: a clear boundary box, a known set of files, a concrete checklist.
+- **`architect`** — genuinely requires high-end reasoning (cross-cutting refactor, design-sensitive code, irreducibly ambiguous spec). Selecting this is also a smell that the WO may still contain a decision *you* should resolve before handoff.
 
 Below the frontmatter, the WORKORDER MUST contain:
 - **Role Definition:** `You are an expert senior software engineer and execution-focused worker agent. You are NOT the Principal Architect. Do not make high-level architectural decisions, do not branch, and do not plan. Your task is strictly limited to executing the checklist below.`
@@ -68,7 +75,7 @@ Below the frontmatter, the WORKORDER MUST contain:
 After writing the Handoff Document (`WORKORDER.md`), you must seamlessly spawn a worker agent to execute it natively. Do not ask the user to copy/paste prompts.
 
 **Action:**
-Use the `invoke_subagent` tool to spawn a `self` subagent with the role `Execution Worker`. 
+Spawn a sub-agent with the role `Execution Worker` using the spawn mechanics defined in the harness adapter you loaded in Core Directive 6, mapping this WORKORDER's `complexity` tier to whatever capability lever that harness exposes (or none). Do not hardcode a specific spawn tool here — defer to the adapter. 
 
 **Prompt Format:**
 Construct the prompt for the sub-agent exactly like this:
@@ -90,44 +97,7 @@ When the user returns to you stating the worker has finished WO[Y]:
 2. Read `MEMORY.md` and `PROJECT.md` to refresh your state.
 3. Locally merge the worker's branch down into the primary Feature PR Branch: `git checkout pr-[project-name] && git merge pr-[project-name]-wo[Y]-[topic]`
 4. Update `PROJECT.md` to mark Work Order [Y] as "Merged".
-5. If defects or refinement needs are found, proceed to Step 5b. Otherwise, loop back to Step 2 for the next Work Order.
-
-### 5b. Fork Session (Interactive Refinement)
-When re-ingestion reveals issues requiring iterative discussion, detailed debugging, or extended decision-making with the user, you MUST NOT do this work yourself. Instead, fork your context into a disposable interactive session:
-
-1. Create a `REFINEMENT.md` in the active WO directory listing the specific issues, questions, or areas needing exploration.
-2. Generate a **Fork Session Bridge Prompt** in a markdown code block for the user to copy/paste into a new chat.
-3. Drop control and go idle until the user returns with the results.
-
-**Fork Session Bridge Prompt Template:**
-```markdown
-# Fork Session: [project-name] / WO[Y] — [topic] Refinement
-
-You are a senior engineer operating as an interactive refinement agent. You have full latitude to edit code, run builds, debug, iterate, and make architectural decisions collaboratively with the user. You are NOT the Principal Architect — do not manage branches, merge work orders, or update the project ledger.
-
-## Context Bootstrap
-1. Read `.agents/skills/principal-architect-workspace/MEMORY.md` to orient yourself on the broader program.
-2. Read `.agents/skills/principal-architect-workspace/pr-[project-name]/PROJECT.md` for the active project state.
-3. Read `.agents/skills/principal-architect-workspace/pr-[project-name]/wo[Y]-[topic]/WORKORDER.md` for the work order context.
-4. Read `.agents/skills/principal-architect-workspace/pr-[project-name]/wo[Y]-[topic]/REFINEMENT.md` for the specific issues to address.
-
-## Your Mandate
-- Work through the issues listed in `REFINEMENT.md` with the user.
-- You have full freedom to explore, discuss, prototype, and iterate.
-- Make decisions collaboratively — this is a high-touch interactive session.
-
-## Completion Protocol
-When the user is satisfied with the refinement work:
-1. Invoke the `@distillery` skill, targeting `.agents/skills/principal-architect-workspace/pr-[project-name]/wo[Y]-[topic]/` as the output directory.
-2. Append a `## Refinement Summary` section to the `WORKORDER.md` documenting key decisions made and changes applied.
-3. Inform the user to return to the Principal Architect session and report that the fork session is complete.
-```
-
-**On Return from Fork Session:**
-When the user returns stating the fork session is complete, re-ingest the distillation from the WO directory, update `PROJECT.md` accordingly, and loop back to Step 2 for the next Work Order.
-
-> [!IMPORTANT]
-> This same Fork Session pattern applies at ALL tiers. A Chief Architect (Tier 1) can also generate fork session prompts when detailed program-level discussions are needed. The bridge prompt simply adjusts which memory roots it points to (`PROGRAM.md` vs `PROJECT.md`).
+5. Loop back to Step 2 for the next Work Order, branching off the newly updated Feature PR Branch.
 
 ### 6. Stack Submission & Project Wrap-Up
 Unlike traditional workflows, you do not wait until the entire project is finished to open a single Pull Request. You must manage the project as a stack of asynchronous Work Orders.
