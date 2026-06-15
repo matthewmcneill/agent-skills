@@ -38,12 +38,14 @@
       "importedAt": "2026-05-15T22:17:16Z"
     },
     "pio-manager": {
-      "type": "imported",
+      "type": "forked",
       "origin": {
         "repo": "https://github.com/jl-codes/platformio-mcp.git",
         "branch": "main",
         "path": ".agents/skills/pio-manager",
-        "pinnedHash": "09f3d8e18d10af174bbdf9ae82d80a840ed238f5"
+        "pinnedHash": "09f3d8e18d10af174bbdf9ae82d80a840ed238f5",
+        "forkedFromHash": "09f3d8e18d10af174bbdf9ae82d80a840ed238f5",
+        "forkedAt": "2026-06-15T17:06:57Z"
       },
       "importedAt": "2026-05-15T22:32:44Z"
     },
