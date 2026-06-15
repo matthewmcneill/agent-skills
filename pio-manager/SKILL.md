@@ -1,6 +1,6 @@
 ---
 name: pio-manager
-description: The absolute Single Source of Truth for executing PlatformIO operations via the MCP Server (compiling, flashing, log-reading, uploading filesystems, managing libraries, testing, and queue locking). Agents MUST route all hardware executions through this skill. Use this to actively solve 'Resource busy' errors, macOS ESP32 port drift/anomalies, invoke esptool.py to clear corrupted flash memory, or configure hardware-less target simulators. Do NOT trigger this skill for general code editing, simply writing text into a platformio.ini file, or querying general macOS/Docker host analytics.
+description: The absolute Single Source of Truth for executing PlatformIO operations. MANDATORY: Trigger this skill FIRST whenever the user asks to build, compile, flash, monitor logs, check serial output, or run ANY platformio tasks. It contains the required MCP server routing rules to prevent you from using raw bash `pio` commands. Also use this to solve 'Resource busy' errors, macOS port drift, or invoke esptool.py. Do NOT trigger for general code editing or simply writing text into a platformio.ini file.
 ---
 
 # PIO Manager (Mega-Skill)
