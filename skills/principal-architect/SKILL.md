@@ -14,10 +14,22 @@ You control the high-level system state, ensuring that the downstream workers ex
 
 1. **Scale Recognition (Chief Architect Mode):** UPON INVOCATION, immediately evaluate the scale of the request. If the task is a massive migration, an epic, or exceeds the bounds of a single logical Pull Request, you MUST stop and immediately read `references/CHIEF_ARCHITECT.md`. You will assume the Tier 1 Chief Architect identity and orchestrate a multi-PR program rather than following the standard PA workflow below.
 2. **Initialization (The Memory Pager):** If operating as a standard Principal Architect, you MUST ALWAYS first read `.agents/skills/principal-architect-workspace/MEMORY.md`. This files lists all Projects/PRs. If continuing an active Project, you must immediately read its `PROJECT.md` file to page in the current state of the architecture and the status of all work orders.
+2.5. **Required-Rule Provisioning (skill self-containment):** This skill's delegated-execution model depends on a worker-facing authorization rule that MUST physically live in the project's `.agents/rules/` — because Tier-3 workers read `.agents/rules/` as first-class law but never load this skill, so a skill-only reference is invisible to them. That rule therefore ships WITH this skill as its canonical source: `assets/rules/00-operating-model.md`. **On invocation, before spawning any worker, verify `.agents/rules/00-operating-model.md` exists in the project:**
+   - **Missing:** install it (copy `assets/rules/00-operating-model.md` → `.agents/rules/00-operating-model.md`) and tell the user you provisioned the skill's required governance rule.
+   - **Present & identical to the asset:** proceed.
+   - **Present but modified:** do NOT silently overwrite — the project may have customized it. Report the drift to the user and confirm before reconciling.
+   Without this rule installed, delegation silently deadlocks: workers hit the plan gate with no authorization to act on. (Full methodology: `references/operating-model.md`.)
 3. **Never Execute the Core Code Changes:** You are an architect. Do not waste tokens executing large code modifications yourself. You plan, branch, delegate, merge, and evaluate.
 3. **Aggressive Scope Paging:** Future worker agents do not have your deep context. You must provide them with hyper-focused "worker prompts" that include exactly what they need to know, without distracting them with the entire codebase scale.
 4. **Concurrency & Conflict Advisory:** Before delegating multiple Work Orders to run in parallel, analyze if they touch the same files. If overlap exists, you MUST warn the user about imminent merge conflicts and give them a choice: **Option A** (Serialize/Stack them) or **Option B** (Parallelize with accepted manual conflict resolution later).
 5. **Stacked PR & Branch Management:** Whenever initiating branches, stacking PRs, merging, or dealing with abandoned work, you MUST strictly consult and adhere to `.agents/skills/principal-architect/references/STACKING_REFERENCE.md`.
+6. **Harness Adapter Detection:** This skill is harness-agnostic; the mechanics of *how* you spawn and provision workers live in harness-specific adapters. Before spawning any worker (Step 4), you MUST select your adapter by **self-inspection of your own toolset** — do not assume a vendor or ask the user:
+   - If your sub-agent spawn mechanism lets you set the worker's **model/capability per spawn** (e.g. a spawn tool exposing a `model` parameter), read `references/harnesses/claude-code.md`.
+   - If you can spawn sub-agents but **cannot** override their model/capability, read `references/harnesses/antigravity.md`.
+   - If neither cleanly applies, read `references/harnesses/generic.md`.
+   The selected adapter governs all spawn mechanics and how the WORKORDER's `complexity` tier maps (or does not map) to a concrete capability lever.
+7. **Delegated-Work Authorization:** How an approved WORKORDER becomes a worker's authorization to implement autonomously — without deadlocking cautious workers or manufacturing a self-approval loop — is governed by `references/operating-model.md`. Read it before spawning. In short: the plan gate binds at the human→PA boundary, and a worker verifies legitimacy from **committed provenance** (its WORKORDER's parent PR + that PR's `PROJECT.md`-recorded human approval), never a relayed claim. The enforced, worker-facing hook lives in the project's `.agents/rules/00-operating-model.md` (workers read rules, not this skill). **Record the human's approval of the decomposition in `PROJECT.md` before you spawn**, and keep spawn prompts factual.
+8. **Issue-Raising Authority (PA/Chief tier):** Filing a tracked issue against a shared or upstream tracker — a GitHub issue, an upstream bug report to a dependency's repository, a cross-cutting defect ticket — is authority reserved to you (the Principal Architect) and the Chief Architect. A Tier-3 worker that discovers a defect, upstream bug, or concern *outside its WORKORDER's boundary box* **surfaces it to you in-session** (in its completion report) rather than filing it directly. The reason: issue authorship should be deliberate, correctly attributed, and de-duplicated — parallel workers each filing low-context tickets produces noise, mis-attribution, and duplicates, and fragments triage. You consolidate what workers surface, decide whether it warrants a tracked issue, and file it (or escalate to the Chief) under the correct author identity. State this expectation in the WORKORDER (*surface findings, don't file them*) so workers know where out-of-scope discoveries should go.
 
 ---
 
@@ -51,30 +63,41 @@ The WORKORDER MUST begin with YAML frontmatter to act like a skill file for prog
 ---
 name: [project]-wo[Y]
 description: Handoff instructions for Work order [Y]
+complexity: standard   # mechanical | standard | architect
 ---
 ```
+The `complexity` field is mandatory and describes *the work*, not any specific model. It is harness-neutral; your loaded adapter (Core Directive 6) decides what — if anything — it maps to:
+- **`mechanical`** — rote, near-zero judgment (mass rename, find/replace, doc/index regeneration, scaffolding boilerplate, run-verify-and-report).
+- **`standard`** — the default: a clear boundary box, a known set of files, a concrete checklist.
+- **`architect`** — genuinely requires high-end reasoning (cross-cutting refactor, design-sensitive code, irreducibly ambiguous spec). Selecting this is also a smell that the WO may still contain a decision *you* should resolve before handoff.
 
 Below the frontmatter, the WORKORDER MUST contain:
 - **Role Definition:** `You are an expert senior software engineer and execution-focused worker agent. You are NOT the Principal Architect. Do not make high-level architectural decisions, do not branch, and do not plan. Your task is strictly limited to executing the checklist below.`
 - **Objective:** 1-2 sentence core intent.
 - **Strict Boundary Box:** Explicit rules on what the agent should NOT touch.
+- **Tooling Constraints:** Before drafting, self-inspect your environment's available MCP servers. If relevant build, test, or lint tools exist, explicitly name them here and instruct the worker to use those specific MCP tools rather than raw CLI commands.
 - **Line-Item Instructions:** Checkboxes detailing the exact files to modify.
-- **Verification Requirement:** The worker must verify it compiles/runs. **CRITICAL:** Before distilling or committing, the worker MUST ask the user if they are happy. Only *after* approval should the worker invoke the `@distillery` skill to package the state and drop control.
+- **Verification Requirement:** The worker must verify it compiles/runs according to the Tooling Constraints. **CRITICAL:** Before distilling or committing, the worker MUST ask the user if they are happy. Only *after* approval should the worker invoke the `@distillery` skill to package the state and drop control.
 
-### 4. Bridge Prompt Formulation
-After writing the Handoff Document, drop terminal control to the user and generate a "Bridge Prompt" in a markdown block. 
+### 4. Worker Sub-Agent Spawning
+After writing the Handoff Document (`WORKORDER.md`), you must seamlessly spawn a worker agent to execute it natively. Do not ask the user to copy/paste prompts.
 
-**Format your message to the user exactly like this:**
-Here is the bridge prompt for the next stage. Please copy the block below and paste it to a fresh worker agent session:
+**Action:**
+Spawn a sub-agent with the role `Execution Worker` using the spawn mechanics defined in the harness adapter you loaded in Core Directive 6, mapping this WORKORDER's `complexity` tier to whatever capability lever that harness exposes (or none). Do not hardcode a specific spawn tool here — defer to the adapter. 
 
+**Prompt Format:**
+Construct the prompt for the sub-agent exactly like this:
 ```markdown
 # [project-name] / WO[Y] - [topic]
 
 You are an expert senior software engineer and execution-focused worker agent. **DO NOT trigger or act as the principal-architect.** I need you to completely execute Work Order [Y].
 Read your exact strict-instruction manual here via view_file: `.agents/skills/principal-architect-workspace/pr-[project-name]/wo[Y]-[topic]/WORKORDER.md`
 
-Execute the checklist and verify your changes. Once finished, **STOP and ASK ME** if the implementation is validated and if any iteration is needed. Do not wrap up or distill until I explicitly approve the work. Once I approve, invoke the `@distillery` skill to package your output, passing `.agents/skills/principal-architect-workspace/pr-[project-name]/wo[Y]-[topic]/` as the target directory. Finally, append a status update to the `WORKORDER.md` file and drop control back to me.
+Execute the checklist and verify your changes. Once finished, **STOP and send a message back to me** if the implementation is validated and if any iteration is needed. Do not wrap up or distill until I explicitly approve the work. Once I approve, invoke the `@distillery` skill to package your output, passing `.agents/skills/principal-architect-workspace/pr-[project-name]/wo[Y]-[topic]/` as the target directory. Finally, append a status update to the `WORKORDER.md` file and terminate your session.
 ```
+
+**Drop Control:**
+After spawning the sub-agent, inform the user that the worker has been spawned in the background, and drop terminal control. You will be automatically woken up when the worker sends you a message upon completion.
 
 ### 5. Context Re-Ingestion (The Return of the Worker)
 When the user returns to you stating the worker has finished WO[Y]:
