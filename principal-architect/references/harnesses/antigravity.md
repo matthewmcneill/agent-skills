@@ -1,11 +1,11 @@
 ---
 name: harness-antigravity
-description: Worker-spawning adapter for the Antigravity harness (harness-hosted runtime only — not for programmatic SDK agents). Selected when you can spawn sub-agents via `invoke_subagent` but cannot override the worker model per spawn.
+description: Worker-spawning adapter for the Antigravity harness (harness-hosted runtime only — not for programmatic SDK agents). Selected when your sub-agent spawn tool is `invoke_subagent` (Google Antigravity).
 ---
 
 # Harness Adapter — Antigravity
 
-You are running under **Antigravity** (harness-hosted runtime — the CLI / chat interface, not a programmatic SDK agent). You confirmed this by self-inspection (Core Directive 6): you can spawn sub-agents, but your spawn mechanism does **not** let you set the worker's model or capability per spawn. This adapter governs how you spawn and right-size workers here.
+You are running under **Antigravity** (harness-hosted runtime — the CLI / chat interface, not a programmatic SDK agent). You confirmed this by self-inspection (Core Directive 6): your sub-agent spawn tool is `invoke_subagent`. This adapter governs how you spawn and right-size workers here.
 
 > [!NOTE]
 > This adapter applies to the **harness-hosted runtime** only. If you are building a programmatic agent via the Google Antigravity Python SDK, the `LocalAgentConfig` does expose a `model` field per agent — in that context, refer to the model-selection guidance in the SDK documentation instead.
@@ -21,6 +21,7 @@ Key parameters to set on every Work Order spawn:
 | `TypeName` | `"self"` | Inherits full harness config; gives the worker all necessary tools. |
 | `Role` | `"Execution Worker"` | Human-readable identity for the worker in the subagent list. |
 | `Prompt` | bridge prompt from Step 4 | The full WORKORDER bridge prompt. |
+| `Model` | See complexity mapping below | **Always set explicitly** — maps from the WORKORDER's `complexity` field. |
 | `Workspace` | See decision table below | **Do not default to `"branch"` — read the decision table.** |
 
 ### `Workspace` Mode Decision
@@ -57,12 +58,20 @@ files. Workers author their own WORKORDER status updates, ADRs, graveyard notes,
 the existing distillations in this workspace. No special authorization block in the spawn prompt
 is required.
 
-## Complexity → Capability (No Model Lever)
+## Complexity → Model Mapping (The Efficiency Lever)
 
-Because per-spawn model selection is unavailable in this runtime, the WORKORDER's `complexity` field is **advisory only** for provisioning — it does not change which model runs the worker. It remains valuable, but the efficiency levers shift:
+You, the Architect, run on **Pro** (or whatever model the user selected for the session) because you hold the macro context and make the judgment calls. Workers execute a strict, pre-specified checklist, so they should run on the **cheapest model that does the job without quality loss**. Model tier is *coupled to work-order specificity* — the tighter your `WORKORDER.md`, the cheaper the model that can execute it.
 
-- **`mechanical`** — Prefer batching several mechanical orders into one worker pass, or executing them inline yourself if cheaper than a spawn round-trip. There is no cheaper model to offload to.
-- **`standard`** — Spawn normally; rely on a tight boundary box and concrete checklist to keep the worker on-rails. Work-order tightness *is* your primary efficiency lever — the more precise the WO, the less the (fixed-cost) worker has to reason.
-- **`architect`** — Same caution as always: if a WO needs architect-grade reasoning, reconsider whether the decision should stay with you before handoff. You cannot escalate the worker to a stronger model.
+Map the WORKORDER's `complexity` field directly to the `Model` parameter on `invoke_subagent`:
 
-**Net:** on this harness, efficiency comes from work-order precision and serialization/batching, not model selection. Keep recording `complexity` faithfully so the artifact stays portable to harnesses that *can* act on it.
+| `complexity` | `Model` | Rationale |
+|---|---|---|
+| `mechanical` | `flash_lite` | Rote, deterministic work — fastest, cheapest tier. |
+| `standard`   | `flash` | **Default worker tier.** Strong at code, fast, far cheaper than Pro. |
+| `architect`  | `pro` | Reserve for WOs that genuinely need architect-grade reasoning. If you reach for this, first ask whether the ambiguity belongs back in *your* court before handoff. |
+
+The `Model` you pass MUST match the `complexity` recorded in the WORKORDER frontmatter, so the choice stays auditable in the durable artifact.
+
+### Advanced: Custom Agent Types via `define_subagent`
+
+For tighter control on mechanical WOs, consider using `define_subagent` to create a stripped-down worker type with restricted tools (`enable_write_tools: true`, `enable_mcp_tools: false`, `enable_subagent_tools: false`) and a minimal system prompt. Then invoke it with `Model: "flash_lite"`. This reduces token overhead and prevents the worker from accessing tools it doesn't need. This is optional — using `TypeName: "self"` with the appropriate `Model` tier is the standard pattern.
