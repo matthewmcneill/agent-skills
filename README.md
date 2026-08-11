@@ -1,25 +1,24 @@
-# Agent Skills
+# ⚠️ DEPRECATED: Agent Skills Monorepo
 
-Personal skill library for AI coding agents. Managed by [skill-manager](https://github.com/matthewmcneill/skill-manager).
+> [!CAUTION]
+> **This monolithic repository has been deprecated.**
+> 
+> Skills are no longer managed centrally in this massive repository. Instead, we have adopted a decentralized architecture where **every skill is its own individual repository**.
 
-## Skills
+## The New Workflow: `skill-manager`
 
-| Skill | Description |
-|---|---|
-| `distillery` | Progressive-reveal memory paging system for distilling long coding sessions into token-efficient summaries |
-| `principal-architect` | Decompose massive tasks into multi-phase implementation plans with stacked branch workflows |
+All skills are now hosted under the [mm-skills](https://github.com/mm-skills) GitHub organization. 
 
-## Usage
+Projects now include these skills as **git submodules** via the `skill-manager` tool, ensuring you only pull in the exact skills you need, when you need them.
 
-Add this repo as a remote in your skill library:
+To get started with the new architecture, install the `skill-manager` globally or check its documentation here:
+**[https://github.com/mm-skills/skill-manager](https://github.com/mm-skills/skill-manager)**
 
-```bash
-add-remote '{"name": "personal", "url": "https://github.com/matthewmcneill/agent-skills.git", "skillsPath": "skills/"}'
-```
+## Redirects
 
-Then search and install skills:
+Some of the core skills have direct redirects in this repository to prevent old links from breaking immediately:
+* `principal-architect` -> [mm-skills/principal-architect](https://github.com/mm-skills/principal-architect)
+* `distillery` -> [mm-skills/distillery](https://github.com/mm-skills/distillery)
+* `squareline-studio` -> [mm-skills/squareline-studio](https://github.com/mm-skills/squareline-studio)
 
-```bash
-search '{"query": "distillery"}'
-add '{"name": "distillery", "project": "."}'
-```
+All other legacy skills from this repo have been moved to the `archive/` directory for reference purposes only. They will not receive updates. Please check the `mm-skills` organization for their active equivalents.
